@@ -63,3 +63,9 @@ zeenchat/
 [@frzn23](https://github.com/frzn23)
 
 [LinkedIn](https://www.linkedin.com/in/frzn23/)
+
+## Contact
+
+For questions , contact at [farzeenghaus23@gmail.com](mailto\:farzeenghaus23@gmail.com)
+
+
