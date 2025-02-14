@@ -112,3 +112,47 @@ class ChatManager {
             .replace(/'/g, "&#039;");
     }
 }
+
+class UserStatusManager {
+    constructor(currentUser) {
+        this.currentUser = currentUser;
+        this.statusSocket = null;
+        this.initializeStatusWebSocket();
+    }
+
+    initializeStatusWebSocket() {
+        const wsSchema = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        this.statusSocket = new WebSocket(
+            `${wsSchema}//${window.location.host}/ws/chat/${this.currentUser}/status/`
+        );
+
+        this.statusSocket.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            if (data.type === 'user_status') {
+                this.updateUserStatus(data.user, data.status);
+            }
+        };
+
+        this.statusSocket.onclose = () => {
+            console.log('Status WebSocket connection closed');
+            setTimeout(() => this.initializeStatusWebSocket(), 5000);
+        };
+    }
+
+    updateUserStatus(username, status) {
+        const userElements = document.querySelectorAll(`.user-item a[data-username="${username}"]`);
+        userElements.forEach(element => {
+            const indicator = element.querySelector('.status-indicator');
+            if (indicator) {
+                indicator.classList.remove('online', 'offline');
+                indicator.classList.add(status);
+            }
+        });
+    }
+}
+
+// Initialize status manager if on users page
+if (document.querySelector('.users-list')) {
+    const currentUser = document.querySelector('meta[name="current-user"]').content;
+    new UserStatusManager(currentUser);
+}

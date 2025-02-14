@@ -1,12 +1,18 @@
-{% extends 'chatapp/base.html' %}
+{% load static %}
 
-{% block content %}
-<div class="max-w-2xl mx-auto">
-    <h2 class="text-2xl font-bold mb-6">Chat Users</h2>
-    <div class="bg-white rounded-lg shadow">
+<meta name="current-user" content="{{ request.user.username }}">
+
+<!-- Debug info -->
+<div class="p-4 bg-gray-100">
+    <p>Total users: {{ debug_user_count }}</p>
+    <p>Current user: {{ request.user.username }}</p>
+</div>
+
+<div class="users-list">
+    {% if users %}
         {% for user_data in users %}
             <div class="user-item">
-                <a href="{% url 'chat' username=user_data.user.username %}" class="block p-4" data-username="{{ user_data.user.username }}">
+                <a href="{% url 'chat' user_data.user.username %}" class="block p-4 border-b hover:bg-gray-50" data-username="{{ user_data.user.username }}">
                     <div class="flex items-center">
                         <div class="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white">
                             {{ user_data.user.username|make_list|first|upper }}
@@ -19,6 +25,11 @@
                 </a>
             </div>
         {% endfor %}
-    </div>
+    {% else %}
+        <div class="p-4 text-gray-500">
+            No other users found
+        </div>
+    {% endif %}
 </div>
-{% endblock %}
+
+<script src="{% static 'chatapp/js/chat.js' %}"></script> 

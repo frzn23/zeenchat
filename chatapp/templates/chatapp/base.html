@@ -5,9 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ZeenChat</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/static/chatapp/css/style.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet" crossorigin="anonymous">
+    <link rel="stylesheet" href="/static/chatapp/css/style.css?v=1.0">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" crossorigin="anonymous">
 </head>
 <body class="bg-gray-100">
     <nav class="bg-indigo-600 p-4">
@@ -45,8 +45,11 @@
 
                     <!-- User Menu -->
                     <div class="relative">
-                        <button onclick="toggleUserMenu()" class="text-white hover:text-gray-200">
-                            <i class="fas fa-user-circle text-2xl"></i>
+                        <button onclick="toggleUserMenu()" class="text-white hover:text-gray-200 flex items-center">
+                            <div class="relative">
+                                <i class="fas fa-user-circle text-2xl"></i>
+                                <span class="status-indicator absolute bottom-0 right-0 border-2 border-indigo-600 {% if user.is_authenticated %}online{% else %}offline{% endif %}"></span>
+                            </div>
                         </button>
                         <div id="userDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl z-50">
                             <div class="py-1">
