@@ -16,17 +16,27 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
-
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-ny+o5v-y861n+kguypqq2)ivq89wym@+e0fm5d)l1qx968ehc&'
+SECRET_KEY = os.getenv(
+    "DJANGO_SECRET_KEY",
+    "django-insecure-ny+o5v-y861n+kguypqq2)ivq89wym@+e0fm5d)l1qx968ehc&"
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = True if (
+        os.getenv("DJANGO_DEBUG", "false").lower() == "true"
+) else False
 
-ALLOWED_HOSTS = ["*"]
+if (hosts := os.getenv("DJANGO_ALLOWED_HOSTS", None)) is not None:
+    ALLOWED_HOSTS = hosts.split(", ")
+
+# CSRF Configuration
+if (origins := os.getenv("CSRF_TRUSTED_ORIGINS", None)) is not None:
+    CSRF_TRUSTED_ORIGINS = origins.split(", ")
+
+CSRF_COOKIE_SECURE = True if (
+        os.getenv("CSRF_COOKIE_SECURE", "false").lower() == "true"
+) else False
 
 
 # Application definition
@@ -48,7 +58,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [f"redis://:{os.getenv('REDIS_PASSWORD', '')}@{os.getenv('REDIS_HOST', '127.0.0.1')}:{os.getenv('REDIS_PORT', 6379)}"],
+            "hosts": [f"redis://:{os.getenv('REDIS_PASSWORD', '')}@{os.getenv('REDIS_HOST', 'redis')}:{os.getenv('REDIS_PORT', 6379)}"],
         },
     }
 }
@@ -57,6 +67,7 @@ ASGI_APPLICATION = 'zeenchat.asgi.application'
 
 
 MIDDLEWARE = [
+    'chatapp.middleware.HealthCheckMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -89,13 +100,25 @@ WSGI_APPLICATION = 'zeenchat.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
-DATABASES = {
-    'default': {
+# Currently Configured Databases: Postgres (default), SQLite
+# Database engine can be chosen via environment variable "DATABASE"
+if (db_engine := os.getenv("DATABASE", None)) == "sqlite3":
+    default = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
-}
+# elif db_engine == "":
+else:
+    default = {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.getenv("DB_NAME", "AppDatabase"),
+        "USER": os.getenv("DB_USER", "appuser"),
+        "PASSWORD": os.getenv("DB_PASSWORD"),
+        "HOST": os.getenv("DB_HOST", "db"),
+        "PORT": os.getenv("DB_PORT", "5432"),
+    }
+
+DATABASES = { 'default': default }
 
 
 # Password validation
@@ -132,7 +155,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
+STATIC_ROOT = BASE_DIR / 'static'
 STATIC_URL = 'static/'
+
+MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_URL = '/media/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
