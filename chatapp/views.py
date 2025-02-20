@@ -60,19 +60,14 @@ def save_message(request):
 
 @login_required
 def chat(request, username):
-    page_number = request.GET.get('page', 1)
     other_user = User.objects.get(username=username)
     messages = Message.objects.filter(
         (models.Q(sender=request.user, receiver=other_user) |
          models.Q(sender=other_user, receiver=request.user))
     ).order_by('timestamp')
     
-    paginator = Paginator(messages, 5) #number kept low for testing, set to optimal number of messages
-
-    page_number = request.GET.get('page')
-    if not page_number:
-        page_number = paginator.num_pages
-
+    paginator = Paginator(messages, 10) #number kept low for testing, set to optimal number of messages
+    page_number = request.GET.get('page', paginator.num_pages)
     messages_page = paginator.get_page(page_number)
 
     if request.headers.get('HX-Request'):
