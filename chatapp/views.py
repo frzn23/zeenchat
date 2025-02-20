@@ -8,6 +8,7 @@ from django.db import models
 from .models import Message
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.core.paginator import Paginator
 import json
 from .forms import CustomUserForm
 
@@ -59,13 +60,28 @@ def save_message(request):
 
 @login_required
 def chat(request, username):
+    page_number = request.GET.get('page', 1)
     other_user = User.objects.get(username=username)
     messages = Message.objects.filter(
         (models.Q(sender=request.user, receiver=other_user) |
          models.Q(sender=other_user, receiver=request.user))
     ).order_by('timestamp')
+    
+    paginator = Paginator(messages, 5) #number kept low for testing, set to optimal number of messages
+
+    page_number = request.GET.get('page')
+    if not page_number:
+        page_number = paginator.num_pages
+
+    messages_page = paginator.get_page(page_number)
+
+    if request.headers.get('HX-Request'):
+        return render(request, 'chatapp/partials/message_list.html', {
+            'messages': messages_page,
+            'other_user': other_user
+        })
 
     return render(request, 'chatapp/chat.html', {
         'other_user': other_user,
-        'messages': messages  # content is auto-decrypted
+        'messages': messages_page  # content is auto-decrypted
     })
