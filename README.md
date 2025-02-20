@@ -63,6 +63,9 @@ pip install -r requirements.txt
 1. Download Redis for Windows from [Redis Downloads](https://pilotfiber.dl.sourceforge.net/project/redis-for-windows.mirror/v5.0.14.1/Redis-x64-5.0.14.1.msi?viasf=1)
 2. Install and start the Redis service
 
+```bash
+redis-server
+```
 #### Linux
 ```bash
 sudo apt update
