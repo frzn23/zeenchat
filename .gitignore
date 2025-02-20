@@ -1,5 +1,4 @@
 __pycache__/
-zeenchat/__pycache__
-chatapp/__pycache__
+**/__pycache__/
 chatapp/migrations/
 db.sqlite3
