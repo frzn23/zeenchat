@@ -3,3 +3,4 @@ __pycache__/
 chatapp/migrations/
 db.sqlite3
 dump.rdb
+*.pyc
