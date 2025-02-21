@@ -144,6 +144,14 @@ For production deployment, ensure you:
 4. Push to the branch (`git push origin feature/improvement`)
 5. Create a Pull Request
 
+### **Contributors**  
+
+A huge thanks to all the amazing contributors who are helping make ZeenChat better! 🚀  
+
+[![](https://contrib.rocks/image?repo=frzn23/zeenchat)](https://github.com/frzn23/zeenchat/graphs/contributors)  
+
+Want to contribute? Check out the [Contributing Guidelines](#contributing) and submit a PR!  
+
 ## Security Issues
 
 If you discover any security-related issues, please email farzeenghaus23@gmail.com instead of using the issue tracker.
