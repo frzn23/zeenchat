@@ -111,9 +111,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
         sender = self.user.username
         receiver_username = data.get('receiver')
 
-        if not receiver_username or receiver_username not in self.private_groups:
-            logger.warning(f"No chat group for {receiver_username}")
+        if not receiver_username:
+            logger.warning("No receiver specified")
             return
+            
+        if receiver_username not in self.private_groups:
+            # Initialize the chat group if it doesn't exist
+            await self.handle_start_chat({'receiver': receiver_username})
 
         group_name = self.private_groups[receiver_username]
         await self.channel_layer.group_send(group_name, {
