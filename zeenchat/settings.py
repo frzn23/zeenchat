@@ -53,9 +53,6 @@ CHANNEL_LAYERS = {
     }
 }
 
-ASGI_APPLICATION = 'zeenchat.asgi.application'
-
-
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -64,7 +61,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'chatapp.middleware.UserStatusMiddleware',
 ]
 
 ROOT_URLCONF = 'zeenchat.urls'
@@ -86,7 +82,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'zeenchat.wsgi.application'
-
+ASGI_APPLICATION = 'zeenchat.asgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
