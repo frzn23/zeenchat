@@ -63,6 +63,9 @@ pip install -r requirements.txt
 1. Download Redis for Windows from [Redis Downloads](https://pilotfiber.dl.sourceforge.net/project/redis-for-windows.mirror/v5.0.14.1/Redis-x64-5.0.14.1.msi?viasf=1)
 2. Install and start the Redis service
 
+```bash
+redis-server
+```
 #### Linux
 ```bash
 sudo apt update
@@ -140,6 +143,14 @@ For production deployment, ensure you:
 3. Make changes and comGPL (`git comGPL -am 'Add new feature'`)
 4. Push to the branch (`git push origin feature/improvement`)
 5. Create a Pull Request
+
+### **Contributors**  
+
+A huge thanks to all the amazing contributors who are helping make ZeenChat better! 🚀  
+
+[![](https://contrib.rocks/image?repo=frzn23/zeenchat)](https://github.com/frzn23/zeenchat/graphs/contributors)  
+
+Want to contribute? Check out the [Contributing Guidelines](#contributing) and submit a PR!  
 
 ## Security Issues
 

@@ -5,10 +5,14 @@
 <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-md">
     <div class="border-b p-4">
         <h2 class="text-xl font-semibold">Chat with {{ other_user.username }}</h2>
+        <div id="typing-indicator" class="px-4 py-2 text-sm text-gray-500 hidden">
+            <span id="typing-username"></span> is typing...
+        </div>
     </div>
-    
+
     <div id="chat-messages" class="h-96 overflow-y-auto p-4 space-y-4">
         {% if messages.has_previous %}
+
         <div id="load-more"
             hx-get="{% url 'chat' username=other_user.username %}?page={{ messages.previous_page_number }}"
             hx-swap="outerHTML"
@@ -17,19 +21,31 @@
         </div>
         {% endif %}
         
-        {% for message in messages %}
-        <div class="flex {% if message.sender == request.user %}justify-end{% endif %}">
-            <div class="max-w-xs lg:max-w-md p-3 rounded-lg {% if message.sender == request.user %}bg-indigo-600 text-white{% else %}bg-gray-200{% endif %}">
-                <p>{{ message.content }}</p>
-                <span class="text-xs {% if message.sender == request.user %}text-indigo-200{% else %}text-gray-500{% endif %}">
-                    {{ message.timestamp|date:"g:i A" }}
-                </span>
+
+            <div id="load-more"
+                hx-get="{% url 'chat' username=other_user.username %}?page={{ messages.previous_page_number }}"
+                hx-swap="outerHTML"
+                hx-trigger="intersect"
+                style="margin-top: 200vh;">
             </div>
-        </div>
+        {% endif %}
+
+        {% for message in messages %}
+            <div class="message-container flex {% if message.sender == request.user %}justify-end{% endif %}">
+                <div class="max-w-xs lg:max-w-md p-3 rounded-lg {% if message.sender == request.user %}bg-indigo-600 text-white{% else %}bg-gray-200{% endif %}">
+                    <p>{{ message.content }}</p>
+                    <span class="text-xs {% if message.sender == request.user %}text-indigo-200{% else %}text-gray-500{% endif %}">
+                        {{ message.timestamp|date:"g:i A" }}
+                    </span>
+                </div>
+            </div>
         {% endfor %}
     </div>
 
+
     <div id="typing-area" class="p-2 text-sm italic text-gray-500"></div>
+
+
 
     <div class="border-t p-4">
         <form id="chat-form" class="flex flex-col sm:flex-row gap-4">

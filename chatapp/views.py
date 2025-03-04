@@ -80,3 +80,4 @@ def chat(request, username):
         'other_user': other_user,
         'messages': messages_page  # content is auto-decrypted
     })
+
