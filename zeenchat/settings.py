@@ -53,9 +53,6 @@ CHANNEL_LAYERS = {
     }
 }
 
-ASGI_APPLICATION = 'zeenchat.asgi.application'
-
-
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -85,7 +82,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'zeenchat.wsgi.application'
-
+ASGI_APPLICATION = 'zeenchat.asgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
@@ -133,6 +130,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -141,3 +139,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'users'
 LOGOUT_REDIRECT_URL = 'login'
+
+# Cache settings
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+        'LOCATION': CHANNEL_LAYERS['default']['CONFIG']['hosts'][0],
+    }
+}

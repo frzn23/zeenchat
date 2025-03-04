@@ -1,19 +1,41 @@
 {% extends 'chatapp/base.html' %}
+{% load static %}
 
 {% block content %}
 <div class="max-w-2xl mx-auto">
     <h2 class="text-2xl font-bold mb-6">Chat Users</h2>
-    <div class="bg-white rounded-lg shadow">
-        {% for user in users %}
-        <a href="{% url 'chat' user.username %}" class="block p-4 border-b hover:bg-gray-50">
-            <div class="flex items-center">
-                <div class="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white">
-                    {{ user.username|make_list|first|upper }}
+    <div class="users-list-container bg-white rounded-lg shadow">
+        {% if users %}
+            {% for user in users %}
+                <div class="user-item">
+                    <a href="{% url 'chat' user.username %}" 
+                       class="block p-4 border-b hover:bg-gray-50" 
+                       data-username="{{ user.username }}">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white">
+                                {{ user.username|make_list|first|upper }}
+                            </div>
+                            <div class="ml-4 flex items-center">
+                                <span class="text-lg">{{ user.username }}</span>
+                            </div>
+                        </div>
+                    </a>
                 </div>
-                <span class="ml-4 text-lg">{{ user.username }}</span>
+            {% endfor %}
+        {% else %}
+            <div class="p-4 text-gray-500">
+                No other users found
             </div>
-        </a>
-        {% endfor %}
+        {% endif %}
     </div>
 </div>
+
+<script src="{% static 'chatapp/js/chat.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        new UserStatusManager('{{ request.user.username }}', '');
+    });
+</script>
+
+
 {% endblock %}

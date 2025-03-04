@@ -5,10 +5,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ZeenChat</title>
+
+    <meta name="current-user" content="{{ request.user.username }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet" crossorigin="anonymous">
+    <link rel="stylesheet" href="/static/chatapp/css/style.css?v=1.0">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" crossorigin="anonymous">
+
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/static/chatapp/css/style.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+
 </head>
 <body class="bg-gray-100">
     <nav class="bg-indigo-600 p-4">
@@ -46,8 +53,11 @@
 
                     <!-- User Menu -->
                     <div class="relative">
-                        <button onclick="toggleUserMenu()" class="text-white hover:text-gray-200">
-                            <i class="fas fa-user-circle text-2xl"></i>
+                        <button onclick="toggleUserMenu()" class="text-white hover:text-gray-200 flex items-center">
+                            <div class="relative">
+                                <i class="fas fa-user-circle text-2xl"></i>
+                                <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
+                            </div>
                         </button>
                         <div id="userDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl z-50">
                             <div class="py-1">

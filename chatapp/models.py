@@ -1,12 +1,24 @@
 # chatapp/models.py
-from django.db import models
-from django.contrib.auth.models import User
-from cryptography.fernet import Fernet
 import base64
+from cryptography.fernet import Fernet
 from django.conf import settings
+from django.contrib.auth.models import User
+from django.db import models
+from django.utils import timezone
 
 # Generate a key once and store it securely
 KEY = settings.SECRET_KEY[:32]  # Use a strong, static key instead of this
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    is_online = models.BooleanField(default=False)
+    last_seen = models.DateTimeField(default=timezone.now)
+    
+    class Meta:
+        indexes = [
+            models.Index(fields=['is_online']),
+            models.Index(fields=['last_seen'])
+        ]
 
 def get_cipher():
     key = base64.urlsafe_b64encode(KEY.encode())  # Ensure 32-byte key
@@ -16,7 +28,7 @@ class Message(models.Model):
     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
     receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_messages')
     
-    _content = models.TextField(db_column='content')  # Store encrypted content
+    _content = models.TextField(db_column='content', default="")  # Store encrypted content
     timestamp = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
 
