@@ -57,7 +57,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self._broadcast_user_list_update()  # Let everyone know this user is gone
 
     async def receive(self, text_data):
- 
         """Handle messages sent from the client"""
         data = json.loads(text_data)
         message_type = data.get('type', 'chat_message')
@@ -127,60 +126,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'is_typing': is_typing
         })
         logger.debug(f"{sender} is typing: {is_typing} in {group_name}")
-
-        text_data_json = json.loads(text_data)
-        event_type = text_data_json.get("type") #Check the type of event
-
-        if event_type == "message":
-            message = text_data_json['message']
-            sender = text_data_json['sender']     
-        
-            # Send message to room group
-            await self.channel_layer.group_send(
-                self.room_group_name,
-                {
-                    'type': 'chat_message',
-                    'message': message,
-                    'sender': sender
-                }
-            )
-        
-        elif event_type == "typing":
-            username = text_data_json["username"]
-
-            await self.channel_layer.group_send(
-                self.room_group_name,
-                {
-                    'type': 'user_typing',
-                    "username": username,
-                }
-            )
-             
-        elif event_type == "stopped_typing":
-            username = text_data_json["username"]
-        
-            await self.channel_layer.group_send(
-                self.room_group_name,
-                {
-                    'type': 'user_stopped_typing',
-                    'username': username,
-                }
-            )        
-
-    #Outgoing Typing indicator functions
-
-    async def user_typing(self, event):
-        await self.send(text_data = json.dumps({
-            'type':'typing',
-            'username': event['username'],
-        }))
-
-    async def user_stopped_typing(self, event):
-        await self.send(text_data = json.dumps({
-            'type':'stopped_typing',
-            'username': event['username'],
-        }))
-
 
     async def chat_message(self, event):
         """Relay chat messages to the client"""
@@ -269,7 +214,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     def _generate_group_name(self, other_username):
         """Create a unique name for private chat groups"""
-        return f"chat_{min(self.user.username, other_username)}_{max(self.user.username, other_username)}"
+        user1 = self.user.username.replace(' ', '_').lower()
+        user2 = other_username.replace(' ', '_').lower()
+        return f"chat_{min(user1, user2)}_{max(user1, user2)}"
 
     async def _broadcast_user_list_update(self):
         """Notify all connected users of an updated user list"""

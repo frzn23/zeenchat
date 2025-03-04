@@ -4,7 +4,6 @@ class ChatManager {
         console.log(` setting up chat between ${currentUser} and ${otherUser}!`); 
                this.currentUser = currentUser;
         this.currentUser = currentUser;
-
         this.otherUser = otherUser; 
         this.socket = null;                  
         this.messageInput = document.getElementById('chat-message-input');  // Input field for typing messages
@@ -13,44 +12,9 @@ class ChatManager {
         this.csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || 'N/A';
         this.typingTimeout = null;           // Timer for typing indicator
         this.hasStartedChat = false;         // Track if we've started the chat session
-
-        this.otherUser = otherUser;
-        this.socket = null;
-        this.messageInput = document.getElementById('chat-message-input');
-        this.messageForm = document.getElementById('chat-form');
-        this.messagesDiv = document.getElementById('chat-messages');
-        this.csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-        this.typingIndicator = document.getElementById('typing-indicator');
-        this.typingUsername = document.getElementById('typing-username');
-        this.typingTimeout = null;
-
         
         this.initializeWebSocket();
         this.setupEventListeners();
-        this.setupTypingDetection();
-    }
-
-    setupTypingDetection() {
-        this.messageInput.addEventListener('input', () => {
-            if (!this.typingTimeout) {
-                this.socket.send(JSON.stringify({
-                    'type': 'typing',
-                    'username': this.currentUser
-                }));
-            }
-            
-            // Clear existing timeout
-            clearTimeout(this.typingTimeout);
-            
-            // Set new timeout
-            this.typingTimeout = setTimeout(() => {
-                this.socket.send(JSON.stringify({
-                    'type': 'stopped_typing',
-                    'username': this.currentUser
-                }));
-                this.typingTimeout = null;
-            }, 1000); // We stop typing indicator after 1 second of no input
-        });
     }
 
     /**
@@ -89,45 +53,6 @@ class ChatManager {
             setTimeout(() => this.initializeWebSocket(), 5000);
         };
 
-        this.socket.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            
-            if (data.type === 'typing') {
-                this.showTypingIndicator(data.username);
-            } else if (data.type === 'stopped_typing') {
-                this.hideTypingIndicator();
-            } else {
-                this.appendMessage(data.message, data.sender === this.currentUser);
-                this.hideTypingIndicator();
-            }
-        };
-    }
-
-    showTypingIndicator(username) {
-        if (username !== this.currentUser) {
-            this.typingUsername.textContent = username;
-            this.typingIndicator.classList.remove('hidden');
-        }
-    }
-
-    hideTypingIndicator() {
-        this.typingIndicator.classList.add('hidden');
-    }
-
-    async saveMessageToDatabase(message) {
-        try {
-            const response = await fetch('/save-message/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': this.csrfToken
-                },
-                body: JSON.stringify({
-                    message: message,
-                    receiver: this.otherUser
-                })
-            });
-
         this.socket.onerror = (error) => {
             console.error('Uh-oh, chat WebSocket hit a snag:', error);
         };
@@ -153,11 +78,7 @@ class ChatManager {
                     }
                     console.log('Chat: Sending chat message:', message);
                     this.socket.send(JSON.stringify({
-
                         'type': 'chat_message',
-
-                        'type': 'message',
-
                         'message': message,
                         'sender': this.currentUser,
                         'receiver': this.otherUser
