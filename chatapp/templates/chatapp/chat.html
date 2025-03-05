@@ -12,13 +12,16 @@
 
     <div id="chat-messages" class="h-96 overflow-y-auto p-4 space-y-4">
         {% if messages.has_previous %}
-            <div id="load-more"
-                hx-get="{% url 'chat' username=other_user.username %}?page={{ messages.previous_page_number }}"
-                hx-swap="outerHTML"
-                hx-trigger="intersect"
-                style="margin-top: 200vh;">
-            </div>
+
+        <div id="load-more"
+            hx-get="{% url 'chat' username=other_user.username %}?page={{ messages.previous_page_number }}"
+            hx-swap="outerHTML"
+            hx-trigger="intersect"
+            style="margin-top: 200vh;">
+        </div>
         {% endif %}
+        
+
         {% for message in messages %}
             <div class="message-container flex {% if message.sender == request.user %}justify-end{% endif %}">
                 <div class="max-w-xs lg:max-w-md p-3 rounded-lg {% if message.sender == request.user %}bg-indigo-600 text-white{% else %}bg-gray-200{% endif %}">
@@ -30,6 +33,10 @@
             </div>
         {% endfor %}
     </div>
+
+
+    <div id="typing-area" class="p-2 text-sm italic text-gray-500"></div>
+
 
 
     <div class="border-t p-4">
