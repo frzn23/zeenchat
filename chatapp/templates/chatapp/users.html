@@ -11,12 +11,19 @@
                     <a href="{% url 'chat' user.username %}" 
                        class="block p-4 border-b hover:bg-gray-50" 
                        data-username="{{ user.username }}">
-                        <div class="flex items-center">
-                            <div class="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white">
-                                {{ user.username|make_list|first|upper }}
+                        <div class="flex justify-between">
+                            <div class="flex item-center">
+                                <div class="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white">
+                                    {{ user.username|make_list|first|upper }}
+                                </div>
+                                <div class="ml-4 flex items-center">
+                                    <span class="text-lg">{{ user.username }}</span>
+                                </div>
                             </div>
-                            <div class="ml-4 flex items-center">
-                                <span class="text-lg">{{ user.username }}</span>
+                            <div>
+                                <span id="unread-{{ user.username }}" 
+                                    class="ml-2 text-sm text-white bg-red-500 px-2 py-0.5 rounded-full hidden unread-indicator">
+                                </span>
                             </div>
                         </div>
                     </a>
