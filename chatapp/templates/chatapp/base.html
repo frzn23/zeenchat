@@ -138,10 +138,10 @@
             const userButton = event.target.closest('.fa-user-circle');
             const bellButton = event.target.closest('.fa-bell');
 
-            if (!userButton && !userDropdown.contains(event.target)) {
+            if (userDropdown && !userButton && !userDropdown.contains(event.target)) {
                 userDropdown.classList.add('hidden');
             }
-            if (!bellButton && !notificationDropdown.contains(event.target)) {
+            if (notificationDropdown && !bellButton && !notificationDropdown.contains(event.target)) {
                 notificationDropdown.classList.add('hidden');
             }
         });
