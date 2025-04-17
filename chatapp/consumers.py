@@ -95,6 +95,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
         try:
             receiver = await database_sync_to_async(User.objects.get)(username=receiver_username)
             message_obj = await self.save_message(message, receiver)
+
+            # Broadcast to the lobby that there's a new unread message (for UI updates)
+            await self.channel_layer.group_send(self.lobby_group_name, {
+                'type': 'unread_message_update',
+                'sender': sender,
+                'receiver': receiver_username
+            })
+
             group_name = self.private_groups[receiver_username]
             await self.channel_layer.group_send(group_name, {
                 'type': 'chat_message',
@@ -104,6 +112,16 @@ class ChatConsumer(AsyncWebsocketConsumer):
             })
         except User.DoesNotExist:
             logger.error(f"User {receiver_username} doesn’t exist")
+    
+    async def unread_message_update(self,event):
+        """send unread message update to client """
+        await self.send(text_data=json.dumps(
+            {
+                'type' :'unread_message_update',
+                'sender': event['sender'],
+                'receiver':event['receiver']
+            }
+        ))
 
     async def handle_typing(self, data):
         """Show typing indicators in private chats"""
