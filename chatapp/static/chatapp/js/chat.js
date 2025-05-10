@@ -187,7 +187,9 @@ class UserStatusManager {
     constructor(currentUser) {
         this.currentUser = currentUser;
         this.statusSocket = null;
+        this.unreadCounts = {};
         this.initializeStatusWebSocket();
+        this.fetchUnreadCounts();
     }
 
     initializeStatusWebSocket() {
@@ -207,6 +209,8 @@ class UserStatusManager {
                 data.users.forEach(user => {
                     this.updateUserStatus(user.username, user.is_online);
                 });
+            }else if (data.type === 'unread_message_update' && data.receiver === this.currentUser){
+                this.handleUnreadMessageUpdate(data.sender);
             }
         };
 
@@ -218,6 +222,45 @@ class UserStatusManager {
         this.statusSocket.onerror = (error) => {
             console.error('Status WebSocket error:', error);
         };
+    }
+
+    fetchUnreadCounts(){
+        fetch('/get-unread-counts/')
+            .then(response=>response.json())
+            .then(data => {
+                this.unreadCounts = data;
+                this.updateUnreadBadges();
+            })
+            .catch(error => {
+                console.error('Error fetching unread counts:', error);
+            });
+    }
+
+    updateUnreadBadges(){
+        // Clear all existing unread indicators first
+        document.querySelectorAll('.unread-indicator').forEach(element => {
+            element.classList.add('hidden');
+            element.textContent = '';
+        });
+
+        // Update badges for users with unread messages
+        for (const [username, count] of Object.entries(this.unreadCounts)) {
+            if (count > 0) {
+                const unreadIndicator = document.getElementById(`unread-${username}`);
+                if (unreadIndicator) {
+                    unreadIndicator.textContent = count > 9 ? '9+' : count;
+                    unreadIndicator.classList.remove('hidden');
+                }
+            }
+        }
+    }
+
+    handleUnreadMessageUpdate(sender) {
+        // only update if the messageis from someone else to current user
+        if (sender !== this.currentUser) {
+            this.unreadCounts[sender] = (this.unreadCounts[sender] || 0) + 1;
+            this.updateUnreadBadges();
+        }
     }
 
     /**

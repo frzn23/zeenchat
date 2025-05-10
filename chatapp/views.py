@@ -61,6 +61,14 @@ def save_message(request):
 @login_required
 def chat(request, username):
     other_user = User.objects.get(username=username)
+
+    # mark message from other_user to current user as read
+    Message.objects.filter(
+        sender = other_user,
+        receiver = request.user,
+        is_read = False
+    ).update(is_read=True)
+
     messages = Message.objects.filter(
         (models.Q(sender=request.user, receiver=other_user) |
          models.Q(sender=other_user, receiver=request.user))
@@ -81,3 +89,15 @@ def chat(request, username):
         'messages': messages_page  # content is auto-decrypted
     })
 
+@login_required
+def get_unread_counts(request):
+    """return a json unread message counts by sender"""
+    unread_counts = Message.objects.filter(
+        receiver=request.user,
+        is_read=False
+    ).values('sender__username').annotate(count=models.Count('id'))
+
+    # Update this line to use sender__username instead of sender_username
+    result = {item['sender__username']: item['count'] for item in unread_counts}
+    print(result)
+    return JsonResponse(result)
