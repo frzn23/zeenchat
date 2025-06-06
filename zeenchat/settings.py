@@ -21,10 +21,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-ny+o5v-y861n+kguypqq2)ivq89wym@+e0fm5d)l1qx968ehc&'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+ENVIRONMENT = os.getenv("ENVIRONMENT", "local").lower()
+SECRET_KEY = os.getenv("SECRET_KEY", "qwerty")
+DEBUG = os.getenv("DEBUG", "false").lower() == "true"
 
 ALLOWED_HOSTS = ["*"]
 
@@ -88,9 +87,16 @@ ASGI_APPLICATION = 'zeenchat.asgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.getenv("PG_DB_NAME", "zeenchat"),
+        "USER": os.getenv("PG_DB_USER", "dev"),
+        "PASSWORD": os.getenv("PG_DB_PASSWORD", "devpass"),
+        "HOST": os.getenv("PG_DB_HOST", "localhost"),
+        "PORT": os.getenv("PG_DB_PORT", 5432),
+        "OPTIONS": {
+            "sslmode": os.getenv("PG_DB_SSLMODE", "prefer"),
+        },
     }
 }
 

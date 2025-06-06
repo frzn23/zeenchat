@@ -79,7 +79,132 @@ brew install redis
 brew services start redis
 ```
 
-### Database Setup
+### 🛠️ Database Setup
+
+We will be setting up a **PostgreSQL** database using **Docker** and **Docker Compose**.
+If you already have PostgreSQL installed on your system, feel free to skip to the [Manual Setup](#manual-database-setup-without-docker) section below.
+
+---
+
+#### Setup with Docker (Recommended)
+
+1. **Install Docker**
+   Follow the official instructions to install Docker for your OS: [Install Docker](https://docs.docker.com/engine/install/)
+
+2. **Install Docker Compose**
+   Docker Desktop includes Docker Compose by default. If not, install it separately: [Install Docker Compose](https://docs.docker.com/compose/install/)
+
+3. **Start the PostgreSQL container**
+
+   Run the following command from the project root:
+
+   ```bash
+   docker-compose -f docker-compose.yml up
+   ```
+
+### Manual PostgreSQL Database Setup (Without Docker)
+
+If you prefer not to use Docker, you can install and configure PostgreSQL directly on your system. Follow the steps based on your operating system:
+
+---
+
+**Install PostgreSQL**
+
+Download and install PostgreSQL from the official site: [https://www.postgresql.org/download/](https://www.postgresql.org/download/)
+
+Follow the platform-specific instructions for your OS.
+
+---
+
+####  Linux / macOS Instructions
+
+1. **Switch to the `postgres` user**:
+
+   ```bash
+   sudo -u postgres -i
+   ```
+
+2. **Launch the PostgreSQL shell**:
+
+   ```bash
+   psql
+   ```
+
+3. **Create the database and user**:
+
+   Run the following SQL commands inside the `psql` shell:
+
+   ```sql
+   CREATE DATABASE zeenchat;
+   CREATE USER dev WITH ENCRYPTED PASSWORD 'devpass';
+   GRANT ALL PRIVILEGES ON DATABASE zeenchat TO dev;
+   ```
+
+4. **Exit `psql`**:
+
+   ```sql
+   \q
+   ```
+
+5. **Exit the `postgres` user shell**:
+
+   ```bash
+   exit
+   ```
+
+---
+
+#### Windows Instructions
+
+1. **Install PostgreSQL** from the [official installer](https://www.enterprisedb.com/downloads/postgres-postgresql-downloads).
+
+   * During installation, set a password for the default `postgres` user.
+   * Install additional tools like **pgAdmin** and **psql CLI**.
+
+2. **Open `psql` Shell**:
+
+   * From Start Menu → PostgreSQL → **SQL Shell (psql)**
+     OR
+   * Use Command Prompt (ensure `psql.exe` is in your PATH).
+
+3. **Login as the `postgres` user** using the password you set during installation.
+
+4. **Run the following SQL commands**:
+
+   ```sql
+   CREATE DATABASE zeenchat;
+   CREATE USER dev WITH ENCRYPTED PASSWORD 'devpass';
+   GRANT ALL PRIVILEGES ON DATABASE zeenchat TO dev;
+   ```
+
+5. **Exit the shell**:
+
+   ```sql
+   \q
+   ```
+
+---
+
+#### Database Connection Info
+
+Use the following credentials in your `.env` file or Django settings:
+
+```ini
+DB_NAME=zeenchat
+DB_USER=dev
+DB_PASSWORD=devpass
+DB_HOST=localhost
+DB_PORT=5432
+```
+
+---
+
+### Source the env
+```bash
+export $(cat .env | xargs)
+```
+
+### Migrations
 ```bash
 python manage.py makemigrations
 python manage.py migrate
@@ -144,13 +269,13 @@ For production deployment, ensure you:
 4. Push to the branch (`git push origin feature/improvement`)
 5. Create a Pull Request
 
-### **Contributors**  
+### **Contributors**
 
-A huge thanks to all the amazing contributors who are helping make ZeenChat better! 🚀  
+A huge thanks to all the amazing contributors who are helping make ZeenChat better! 🚀
 
-[![](https://contrib.rocks/image?repo=frzn23/zeenchat)](https://github.com/frzn23/zeenchat/graphs/contributors)  
+[![](https://contrib.rocks/image?repo=frzn23/zeenchat)](https://github.com/frzn23/zeenchat/graphs/contributors)
 
-Want to contribute? Check out the [Contributing Guidelines](#contributing) and submit a PR!  
+Want to contribute? Check out the [Contributing Guidelines](#contributing) and submit a PR!
 
 ## Security Issues
 
