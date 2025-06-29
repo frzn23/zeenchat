@@ -271,9 +271,8 @@ For production deployment, ensure you:
 
 ### **Contributors**
 
-A huge thanks to all the amazing contributors who are helping make ZeenChat better! 🚀
+A huge thanks to all the amazing contributors who are helping make ZeenChat better!
 
-[![](https://contrib.rocks/image?repo=frzn23/zeenchat)](https://github.com/frzn23/zeenchat/graphs/contributors)
 <a href="https://github.com/frzn23/zeenchat/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=frzn23/zeenchat" />
 </a>
