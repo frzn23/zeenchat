@@ -316,3 +316,70 @@ if (document.getElementById('chat-messages')) {
         console.error('Missing currentUser or otherUser for ChatManager');
     }
 }
+
+// Add Friend button logic for users.html
+const addFriendList = document.getElementById('add-friend-list');
+if (addFriendList) {
+    addFriendList.addEventListener('click', (e) => {
+        if (e.target.classList.contains('add-friend-btn')) {
+            const btn = e.target;
+            const username = btn.getAttribute('data-username');
+            const statusSpan = btn.nextElementSibling;
+            btn.disabled = true;
+            statusSpan.textContent = 'Sending...';
+            fetch(`/add-friend/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ to_user: username })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status) {
+                    btn.closest('li').remove();
+                } else {
+                    statusSpan.textContent = data.message || 'Could not send request.';
+                }
+            })
+            .catch(() => {
+                statusSpan.textContent = 'Error sending request.';
+            })
+            .finally(() => {
+                btn.disabled = false;
+            });
+        }
+    });
+}
+
+// Accept/Decline friend request logic
+const pendingRequestsList = document.getElementById('pending-requests-list');
+if (pendingRequestsList) {
+    pendingRequestsList.addEventListener('click', (e) => {
+        if (e.target.classList.contains('accept-friend-btn') || e.target.classList.contains('decline-friend-btn')) {
+            const requestFromUser = e.target.getAttribute('data-request-id');
+            const action = e.target.classList.contains('accept-friend-btn') ? 'accept' : 'decline';
+            fetch(`/friend-request/${action}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ request_from_user: requestFromUser })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status) {
+                    // Remove the request from the list
+                    e.target.closest('li').remove();
+                } else {
+                    alert(data.message || 'Action failed.');
+                }
+            })
+            .catch(() => {
+                alert('Error processing request.');
+            });
+        }
+    });
+}

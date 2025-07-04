@@ -5,7 +5,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db import models
-from .models import Message
+from .models import Message, FriendRequest
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.core.paginator import Paginator
@@ -30,7 +30,55 @@ def signup(request):
 @login_required
 def users(request):
     users = User.objects.filter(is_superuser=False).exclude(id=request.user.id)
-    return render(request, 'chatapp/users.html', {'users': users})
+
+    users_annotated = users.annotate(
+        # if already friends
+        is_friend = models.Exists(
+            FriendRequest.objects.filter(
+                models.Q(sender=request.user, receiver=models.OuterRef('pk')) |
+                models.Q(receiver=request.user, sender=models.OuterRef('pk')),
+                status=FriendRequest.Status.ACCEPTED
+            )
+        ),
+        # if I've a pending request from them
+        sent_pending = models.Exists(
+            FriendRequest.objects.filter(
+                sender=models.OuterRef('pk'),
+                receiver=request.user,
+                status=FriendRequest.Status.PENDING
+            )
+        ),
+        # if I've sent them a request & is pending
+        i_sent_request = models.Exists(
+            FriendRequest.objects.filter(
+                sender=request.user,
+                receiver=models.OuterRef('pk'),
+            )
+        )
+    ).select_related()
+
+    chat_users = users_annotated.filter(is_friend=True)
+    addable_users = users_annotated.filter(
+        is_friend=False,
+        sent_pending=False,
+        i_sent_request=False
+    )
+    pending_requests = FriendRequest.objects.filter(
+        receiver=request.user, 
+        status=FriendRequest.Status.PENDING
+    ).select_related('sender')
+
+     
+    return render(
+        request, 
+        'chatapp/users.html', 
+        {
+            'users': users,
+            'chat_users': chat_users,
+            'pending_requests': pending_requests,
+            'addable_users': addable_users
+        }
+    )
 
 
 @csrf_exempt
@@ -101,3 +149,51 @@ def get_unread_counts(request):
     result = {item['sender__username']: item['count'] for item in unread_counts}
     print(result)
     return JsonResponse(result)
+
+@login_required
+def add_friend(request):
+    """sends friend request"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            user = User.objects.get(username=data['to_user'])
+
+            FriendRequest.objects.create(
+                sender=request.user,
+                receiver=user   
+            )
+
+            return JsonResponse({'status': 'success', 'message': 'Friend request sent'})
+        
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'error': str(e)}, status=400)
+    return JsonResponse({'status': 'error', 'error': 'Invalid request method'}, status=400)
+
+@login_required
+def accept_or_decline_request(request, action):
+    """accept friend requests"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            sender = User.objects.get(username=data['request_from_user'])
+            
+            # find the friend req obj associated with the users
+            request_obj = FriendRequest.objects.get(
+                sender=sender,
+                receiver=request.user,
+            )
+
+            if action == 'accept':
+                request_obj.status = FriendRequest.Status.ACCEPTED
+                request_obj.save()
+                # request_obj.refresh_from_db()
+                return JsonResponse({'status': 'sucess', 'message': 'Friend request accepted'})
+
+            # upon decline, we'd delete the request obj. so user will be again available to send request.
+            if action == 'decline':
+                request_obj.delete()
+                return JsonResponse({'status': 'sucess', 'message': 'Friend request declined'})
+        
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'error': str(e)}, status=400)
+    return JsonResponse({'status': 'error', 'error': 'Invalid request method'}, status=400)

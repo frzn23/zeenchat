@@ -5,6 +5,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 import hashlib
 
 class UserProfile(models.Model):
@@ -62,3 +63,18 @@ class Message(models.Model):
             return
         cipher = get_cipher()
         self._content = cipher.encrypt(raw_text.encode()).decode()
+
+class FriendRequest(models.Model):
+    class Status(models.TextChoices):
+        PENDING = "pending", _("Pending")   # db value(not translated), display name(translatable)
+        ACCEPTED = "accepted", _("Accepted")
+
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_request')
+    receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_request')
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.PENDING)
+
+
+    def __str__(self):
+        return f'{self.sender} to {self.receiver}'
+
+    
