@@ -3,37 +3,73 @@
 
 {% block content %}
 <div class="max-w-2xl mx-auto">
-    <h2 class="text-2xl font-bold mb-6">Chat Users</h2>
-    <div class="users-list-container bg-white rounded-lg shadow">
-        {% if users %}
-            {% for user in users %}
-                <div class="user-item">
-                    <a href="{% url 'chat' user.username %}" 
-                       class="block p-4 border-b hover:bg-gray-50" 
-                       data-username="{{ user.username }}">
-                        <div class="flex justify-between">
-                            <div class="flex item-center">
-                                <div class="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white">
-                                    {{ user.username|make_list|first|upper }}
+    <h2 class="text-2xl font-bold mb-6">Friends & Requests</h2>
+    <div class="flex gap-2 mb-4">
+        <button id="tab-users" class="tab-btn px-3 py-1 rounded-lg bg-indigo-100 text-indigo-700">Chat Users</button>
+        <button id="tab-requests" class="tab-btn px-3 py-1 rounded-lg bg-gray-100 text-gray-700">Friend Requests</button>
+    </div>
+    <!-- Chat Users Tab: accepted friends or previous chats -->
+    <div id="users-tab-content">
+        <div class="users-list-container bg-white rounded-lg shadow">
+            {% if chat_users %}
+                {% for user in chat_users %}
+                    <div class="user-item">
+                        <a href="{% url 'chat' user.username %}" 
+                           class="block p-4 border-b hover:bg-gray-50" 
+                           data-username="{{ user.username }}">
+                            <div class="flex justify-between">
+                                <div class="flex item-center">
+                                    <div class="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white">
+                                        {{ user.username|make_list|first|upper }}
+                                    </div>
+                                    <div class="ml-4 flex items-center">
+                                        <span class="text-lg">{{ user.username|capfirst }}</span>
+                                    </div>
                                 </div>
-                                <div class="ml-4 flex items-center">
-                                    <span class="text-lg">{{ user.username }}</span>
+                                <div>
+                                    <span id="unread-{{ user.username }}" 
+                                        class="ml-2 text-sm text-white bg-red-500 px-2 py-0.5 rounded-full hidden unread-indicator">
+                                    </span>
                                 </div>
                             </div>
-                            <div>
-                                <span id="unread-{{ user.username }}" 
-                                    class="ml-2 text-sm text-white bg-red-500 px-2 py-0.5 rounded-full hidden unread-indicator">
-                                </span>
-                            </div>
-                        </div>
-                    </a>
+                        </a>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="p-4 text-gray-500">
+                    No friends or chats yet.
                 </div>
-            {% endfor %}
-        {% else %}
-            <div class="p-4 text-gray-500">
-                No other users found
-            </div>
-        {% endif %}
+            {% endif %}
+        </div>
+    </div>
+    <!-- Pending Requests Tab -->
+    <div id="requests-tab-content" class="hidden">
+        <div class="bg-white rounded-lg shadow p-4">
+            <h3 class="text-lg font-semibold mb-2">Pending Requests</h3>
+            <ul id="pending-requests-list">
+                {% for req in pending_requests %}
+                    <li class="flex items-center gap-2 py-1">
+                        <span>{{ req.sender.username|capfirst }}</span>
+                        <button class="accept-friend-btn bg-blue-500 text-white px-2 py-1 rounded" data-request-id="{{ req.sender.username }}">Accept</button>
+                        <button class="decline-friend-btn bg-red-500 text-white px-2 py-1 rounded" data-request-id="{{ req.sender.username }}">Decline</button>
+                    </li>
+                {% empty %}
+                    <li class="text-gray-500">No pending requests.</li>
+                {% endfor %}
+            </ul>
+            <h3 class="text-lg font-semibold mt-6 mb-2">Add Friends</h3>
+            <ul id="add-friend-list">
+                {% for user in addable_users %}
+                    <li class="flex items-center gap-2 py-1">
+                        <span>{{ user.username|capfirst }}</span>
+                        <button class="add-friend-btn bg-green-500 text-white px-2 py-1 rounded" data-username="{{ user.username }}">Add Friend</button>
+                        <span class="add-friend-status ml-2 text-sm"></span>
+                    </li>
+                {% empty %}
+                    <li class="text-gray-500">No users available to add.</li>
+                {% endfor %}
+            </ul>
+        </div>
     </div>
 </div>
 
@@ -41,8 +77,25 @@
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         new UserStatusManager('{{ request.user.username }}', '');
+        // Tab switching logic
+        const tabUsers = document.getElementById('tab-users');
+        const tabRequests = document.getElementById('tab-requests');
+        const usersTabContent = document.getElementById('users-tab-content');
+        const requestsTabContent = document.getElementById('requests-tab-content');
+        tabUsers.addEventListener('click', () => {
+            tabUsers.classList.add('bg-indigo-100', 'text-indigo-700');
+            tabRequests.classList.remove('bg-indigo-100', 'text-indigo-700');
+            tabRequests.classList.add('bg-gray-100', 'text-gray-700');
+            usersTabContent.classList.remove('hidden');
+            requestsTabContent.classList.add('hidden');
+        });
+        tabRequests.addEventListener('click', () => {
+            tabRequests.classList.add('bg-indigo-100', 'text-indigo-700');
+            tabUsers.classList.remove('bg-indigo-100', 'text-indigo-700');
+            tabUsers.classList.add('bg-gray-100', 'text-gray-700');
+            requestsTabContent.classList.remove('hidden');
+            usersTabContent.classList.add('hidden');
+        });
     });
 </script>
-
-
 {% endblock %}
