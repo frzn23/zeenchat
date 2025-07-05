@@ -5,9 +5,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
-
-# Generate a key once and store it securely
-KEY = settings.SECRET_KEY[:32]  # Use a strong, static key instead of this
+import hashlib
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -21,7 +19,12 @@ class UserProfile(models.Model):
         ]
 
 def get_cipher():
-    key = base64.urlsafe_b64encode(KEY.encode())  # Ensure 32-byte key
+    # Create a proper 32-byte key from SECRET_KEY
+    key_material = settings.SECRET_KEY.encode()
+    # Use SHA256 to ensure we get exactly 32 bytes
+    key_bytes = hashlib.sha256(key_material).digest()
+    # Base64 encode to get the proper format for Fernet
+    key = base64.urlsafe_b64encode(key_bytes)
     return Fernet(key)
 
 class Message(models.Model):
@@ -41,11 +44,21 @@ class Message(models.Model):
     @property
     def content(self):
         """Decrypt message before serving."""
-        cipher = get_cipher()
-        return cipher.decrypt(self._content.encode()).decode()
+        if not self._content:
+            return ""
+        try:
+            cipher = get_cipher()
+            return cipher.decrypt(self._content.encode()).decode()
+        except Exception:
+            # If decryption fails, return the original content
+            # This helps with any existing unencrypted data
+            return self._content
 
     @content.setter
     def content(self, raw_text):
         """Encrypt message before saving."""
+        if not raw_text:
+            self._content = ""
+            return
         cipher = get_cipher()
         self._content = cipher.encrypt(raw_text.encode()).decode()
